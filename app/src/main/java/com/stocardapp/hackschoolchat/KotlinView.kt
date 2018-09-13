@@ -15,9 +15,11 @@ class KotlinView @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : TextView(context, attrs, defStyleAttr) {
 
+
     @ModelProp
     fun setValue(chatMessage: ChatMessage) {
         this.text = "${chatMessage.name}: ${chatMessage.message}"
     }
+
 
 }
