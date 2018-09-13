@@ -1,4 +1,4 @@
-package com.stocardapp.hackschoolchat
+package com.stocardapp.hackschoolchat.chats
 
 import android.content.Context
 import android.util.AttributeSet
@@ -9,7 +9,7 @@ import com.stocardapp.hackschoolchat.database.ChatMessage
 
 
 @ModelView(autoLayout = ModelView.Size.MATCH_WIDTH_WRAP_HEIGHT)
-class KotlinView @JvmOverloads constructor(
+class ChatView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
