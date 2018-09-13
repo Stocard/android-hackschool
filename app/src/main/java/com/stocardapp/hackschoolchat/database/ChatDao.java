@@ -24,8 +24,14 @@ public interface ChatDao {
     ChatMessage findByName(String name);
 
     @Insert
-    void insertAll(ChatMessage... users);
+    void insert(ChatMessage messages);
+
+    @Insert
+    void insertAll(List<ChatMessage> messages);
 
     @Delete
     void delete(ChatMessage user);
+
+    @Query("DELETE FROM chatmessage")
+    void nukeTable();
 }
