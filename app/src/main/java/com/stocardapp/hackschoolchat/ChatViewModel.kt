@@ -25,7 +25,7 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
     private var name: String? = null
 
     fun chats(): LiveData<List<EpoxyModel<*>>> {
-        return Transformations.map(database.chatDao().allLive) { input: MutableList<ChatMessage> ->
+        return Transformations.map(database.chatDao().getAllLive()) { input: List<ChatMessage> ->
             input.map {
                 val model = ChatViewModel_()
                 model.id(it.message)
