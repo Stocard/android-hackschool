@@ -17,7 +17,7 @@ object Backend {
                 .build()
     }
 
-    val instance by lazy {
+    val instance: BackendService by lazy {
         retrofit.create<BackendService>(BackendService::class.java)
     }
 

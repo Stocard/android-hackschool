@@ -18,6 +18,10 @@ data class ChatMessage(
 
         @Json(name = "message")
         @ColumnInfo(name = "message")
-        var message: String
+        var message: String,
+
+        @Json(name = "timestamp")
+        @ColumnInfo(name = "timestamp")
+        var timestamp: Long? = null
 
 )

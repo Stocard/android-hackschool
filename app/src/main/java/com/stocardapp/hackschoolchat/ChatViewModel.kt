@@ -15,10 +15,14 @@ import retrofit2.Response
 
 class ChatViewModel(context: Application) : AndroidViewModel(context) {
 
-    private val database: AppDatabase by lazy { Room.databaseBuilder(context, AppDatabase::class.java, "chat_db").build() }
+    private val database: AppDatabase by lazy {
+        Room.databaseBuilder(context, AppDatabase::class.java, "chat_db")
+                .fallbackToDestructiveMigration()
+                .build()
+    }
 
     // TODO: set dynamically
-    private val name: String = "Paula"
+    private var name: String? = null
 
     fun chats(): LiveData<List<EpoxyModel<*>>> {
         return Transformations.map(database.chatDao().allLive) { input: MutableList<ChatMessage> ->
@@ -31,12 +35,20 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
     }
 
     suspend fun send(message: String): Response<ChatMessage> = coroutineScope {
-        val chatMessage = ChatMessage(name = name, message = message)
+        // TODO: name handing is temporary. Change.
+        val n = name
+        val chatMessage = if (n == null) {
+            name = message
+            ChatMessage(name = message, message = "Hi, I'am $name")
+        } else {
+            ChatMessage(name = n, message = message)
+        }
         database.chatDao().insert(chatMessage)
         Backend.instance.post(chatMessage).execute()
     }
 
     fun update(messages: List<ChatMessage>) {
+        // TODO: only update new entries instead
         database.chatDao().nukeTable()
         database.chatDao().insertAll(messages)
     }
