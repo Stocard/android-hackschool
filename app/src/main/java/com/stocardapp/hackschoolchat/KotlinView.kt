@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.widget.TextView
 import com.airbnb.epoxy.ModelProp
 import com.airbnb.epoxy.ModelView
+import com.stocardapp.hackschoolchat.database.ChatMessage
 
 
 @ModelView(autoLayout = ModelView.Size.MATCH_WIDTH_WRAP_HEIGHT)
@@ -15,8 +16,8 @@ class KotlinView @JvmOverloads constructor(
 ) : TextView(context, attrs, defStyleAttr) {
 
     @ModelProp
-    fun setValue(value: String) {
-        this.text = value
+    fun setValue(chatMessage: ChatMessage) {
+        this.text = "${chatMessage.name}: ${chatMessage.message}"
     }
 
 }
