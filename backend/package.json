@@ -5,5 +5,8 @@
   "main": "backend.js",
   "repository": "https://github.com/Stocard/android-hackschool",
   "author": "Stocard (Tobias Schürg, Martin Wenzel)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "restify": "^7.2.1"
+  }
 }

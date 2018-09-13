@@ -13,3 +13,6 @@
 .idea/vcs.xml
 .idea/runConfigurations.xml
 .idea/gradle.xml
+
+
+backend/node_modules/
