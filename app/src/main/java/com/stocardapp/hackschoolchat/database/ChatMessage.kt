@@ -6,11 +6,13 @@ import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 
 
-@Entity
+@Entity(tableName = "chats")
 data class ChatMessage(
 
-        @PrimaryKey(autoGenerate = true)
-        var uid: Int? = null,
+        @PrimaryKey(autoGenerate = false)
+        @Json(name = "timestamp")
+        @ColumnInfo(name = "timestamp")
+        var timestamp: Long? = null,
 
         @Json(name = "name")
         @ColumnInfo(name = "name")
@@ -18,10 +20,7 @@ data class ChatMessage(
 
         @Json(name = "message")
         @ColumnInfo(name = "message")
-        var message: String,
+        var message: String
 
-        @Json(name = "timestamp")
-        @ColumnInfo(name = "timestamp")
-        var timestamp: Long? = null
 
-)
+        )

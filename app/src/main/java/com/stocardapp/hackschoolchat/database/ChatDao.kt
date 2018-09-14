@@ -9,16 +9,13 @@ import androidx.room.Query
 
 @Dao
 interface ChatDao {
-    @Query("SELECT * FROM chatmessage")
+    @Query("SELECT * FROM chats")
     fun getAll(): List<ChatMessage>
 
-    @Query("SELECT * FROM chatmessage")
+    @Query("SELECT * FROM chats")
     fun getAllLive(): LiveData<List<ChatMessage>>
 
-    @Query("SELECT * FROM chatmessage WHERE uid IN (:userIds)")
-    fun loadAllByIds(userIds: IntArray): List<ChatMessage>
-
-    @Query("SELECT * FROM chatmessage WHERE name LIKE :name")
+    @Query("SELECT * FROM chats WHERE name LIKE :name")
     fun findByName(name: String): ChatMessage
 
     @Insert
@@ -30,6 +27,6 @@ interface ChatDao {
     @Delete
     fun delete(user: ChatMessage)
 
-    @Query("DELETE FROM chatmessage")
+    @Query("DELETE FROM chats")
     fun nukeTable()
 }

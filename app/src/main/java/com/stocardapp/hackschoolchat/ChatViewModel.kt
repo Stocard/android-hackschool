@@ -48,7 +48,7 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
     }
 
     fun update(messages: List<ChatMessage>) {
-        // TODO: only update new entries instead
+        // TODO: only update new entries and don't drop the whole table ;-)
         database.chatDao().nukeTable()
         database.chatDao().insertAll(messages)
     }
