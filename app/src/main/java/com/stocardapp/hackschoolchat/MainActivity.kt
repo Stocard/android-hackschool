@@ -9,6 +9,7 @@ import com.airbnb.epoxy.EpoxyModel
 import com.airbnb.epoxy.SimpleEpoxyAdapter
 import com.stocardapp.hackschoolchat.database.Updater
 import com.stocardapp.hackschoolchat.utils.onDone
+import com.stocardapp.hackschoolchat.work.ChatsUpdateWorker
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
@@ -56,7 +57,8 @@ class MainActivity : AppCompatActivity() {
             var count = 0
             while (this.isActive) {
                 Timber.i("update loop ${++count}")
-                updater.update()
+                // updater.update()
+                ChatsUpdateWorker.schedule()
                 delay(3, TimeUnit.SECONDS)
             }
         }

@@ -19,7 +19,7 @@ data class ChatMessage(
         @Json(name = "timestamp")
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "timestamp")
-        var timestamp: Long = 0,
+        var timestamp: Long = Long.MAX_VALUE,
 
         @Json(name = "name")
         @ColumnInfo(name = "name")

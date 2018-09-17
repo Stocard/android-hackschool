@@ -16,6 +16,7 @@ class Updater(
         val response: Response<List<ChatMessage>>? = Backend.instance.getMessages().execute()
         val messages: List<ChatMessage> = response?.body()!! // TODO add null handling
 
+        ChatApplication.database.chatDao().deleteByTimestamp(Long.MAX_VALUE)
         messages.forEach {
             ChatApplication.database.chatDao().insert(it)
         }

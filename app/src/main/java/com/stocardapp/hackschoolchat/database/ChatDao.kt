@@ -10,11 +10,11 @@ interface ChatDao {
     @Query("SELECT * FROM chats")
     fun getAllLive(): LiveData<List<ChatMessage>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(messages: ChatMessage)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAll(messages: List<ChatMessage>)
+    @Query("DELETE FROM chats WHERE timestamp = :timestamp")
+    fun deleteByTimestamp(timestamp: Long)
 
     @Delete
     fun delete(user: ChatMessage)
