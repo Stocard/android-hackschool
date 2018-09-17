@@ -1,4 +1,4 @@
-package com.stocardapp.hackschoolchat
+package com.stocardapp.hackschoolchat.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,7 +7,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.epoxy.EpoxyModel
 import com.airbnb.epoxy.SimpleEpoxyAdapter
-import com.stocardapp.hackschoolchat.database.Updater
+import com.stocardapp.hackschoolchat.R
+import com.stocardapp.hackschoolchat.database.DatabaseUpdateServiceImpl
 import com.stocardapp.hackschoolchat.utils.onDone
 import com.stocardapp.hackschoolchat.work.ChatsUpdateWorker
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
-    private val updater by lazy { Updater(this) }
+    private val updater by lazy { DatabaseUpdateServiceImpl(this) }
     private lateinit var updateJob: Job
     private val viewModel by lazy { ViewModelProviders.of(this).get(ChatViewModel::class.java) }
     private val simpleEpoxyAdapter: SimpleEpoxyAdapter by lazy {

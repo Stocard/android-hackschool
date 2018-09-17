@@ -1,13 +1,13 @@
 package com.stocardapp.hackschoolchat.work
 
 import androidx.work.*
-import com.stocardapp.hackschoolchat.database.Updater
+import com.stocardapp.hackschoolchat.database.DatabaseUpdateServiceImpl
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class ChatsUpdateWorker : Worker() {
 
-    private val updater by lazy { Updater(applicationContext) }
+    private val updater by lazy { DatabaseUpdateServiceImpl(applicationContext) }
 
     override fun doWork(): Result {
         Timber.d("Doing work")

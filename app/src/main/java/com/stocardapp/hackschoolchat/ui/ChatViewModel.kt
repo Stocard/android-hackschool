@@ -1,13 +1,14 @@
-package com.stocardapp.hackschoolchat
+package com.stocardapp.hackschoolchat.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.airbnb.epoxy.EpoxyModel
+import com.stocardapp.hackschoolchat.ChatApplication
 import com.stocardapp.hackschoolchat.backend.Backend
-import com.stocardapp.hackschoolchat.chats.ChatViewModel_
 import com.stocardapp.hackschoolchat.database.ChatMessage
+import com.stocardapp.hackschoolchat.ui.chats.MessageViewModel_
 import kotlinx.coroutines.experimental.coroutineScope
 import retrofit2.Response
 import timber.log.Timber
@@ -21,7 +22,7 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
         return Transformations.map(ChatApplication.database.chatDao().getAllLive()) { input: List<ChatMessage> ->
             Timber.i("Got new set of models ...")
             input.map {
-                val model = ChatViewModel_()
+                val model = MessageViewModel_()
                 model.id(it.timestamp)
                 model.value(it)
             }
