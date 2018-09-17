@@ -47,10 +47,5 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
         Backend.instance.post(chatMessage).execute()
     }
 
-    fun update(messages: List<ChatMessage>) {
-        // TODO: only update new entries and don't drop the whole table ;-)
-        database.chatDao().nukeTable()
-        database.chatDao().insertAll(messages)
-    }
 
 }
