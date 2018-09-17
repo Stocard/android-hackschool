@@ -2,17 +2,24 @@ package com.stocardapp.hackschoolchat.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 
 
-@Entity(tableName = "chats")
+@Entity(
+        tableName = "chats",
+        indices = [Index(
+                value = arrayOf("timestamp"),
+                unique = true
+        )]
+)
 data class ChatMessage(
 
-        @PrimaryKey(autoGenerate = false)
         @Json(name = "timestamp")
+        @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "timestamp")
-        var timestamp: Long? = null,
+        var timestamp: Long = 0,
 
         @Json(name = "name")
         @ColumnInfo(name = "name")
@@ -23,4 +30,4 @@ data class ChatMessage(
         var message: String
 
 
-        )
+)

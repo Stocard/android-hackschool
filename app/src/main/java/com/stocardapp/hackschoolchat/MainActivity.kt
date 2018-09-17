@@ -7,11 +7,12 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.epoxy.EpoxyModel
 import com.airbnb.epoxy.SimpleEpoxyAdapter
+import com.stocardapp.hackschoolchat.database.Updater
 import com.stocardapp.hackschoolchat.utils.onDone
-import com.stocardapp.hackschoolchat.work.UpdateChatsWork
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.isActive
 import kotlinx.coroutines.experimental.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
+    private val updater by lazy { Updater(this) }
     private lateinit var updateJob: Job
     private val viewModel by lazy { ViewModelProviders.of(this).get(ChatViewModel::class.java) }
     private val simpleEpoxyAdapter: SimpleEpoxyAdapter by lazy {
@@ -51,18 +53,23 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         // TODO: can we use a periodic job instead?
         updateJob = launch {
-            UpdateChatsWork.run()
-            delay(3, TimeUnit.SECONDS)
+            var count = 0
+            while (this.isActive) {
+                Timber.i("update loop ${++count}")
+                updater.update()
+                delay(3, TimeUnit.SECONDS)
+            }
         }
     }
 
     override fun onStop() {
+        Timber.w("onStop")
         super.onStop()
         updateJob.cancel()
     }
 
     private fun updateUi(models: List<EpoxyModel<*>>) {
-        Timber.d("Updating UI")
+        Timber.i("Updating UI")
         simpleEpoxyAdapter.removeAllModels()
         simpleEpoxyAdapter.addModels(models)
         recyclerview_chat.scrollToPosition(models.size - 1)

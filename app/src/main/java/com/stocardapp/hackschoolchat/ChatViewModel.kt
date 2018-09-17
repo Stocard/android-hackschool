@@ -4,31 +4,25 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import androidx.room.Room
 import com.airbnb.epoxy.EpoxyModel
 import com.stocardapp.hackschoolchat.backend.Backend
 import com.stocardapp.hackschoolchat.chats.ChatViewModel_
-import com.stocardapp.hackschoolchat.database.AppDatabase
 import com.stocardapp.hackschoolchat.database.ChatMessage
 import kotlinx.coroutines.experimental.coroutineScope
 import retrofit2.Response
+import timber.log.Timber
 
 class ChatViewModel(context: Application) : AndroidViewModel(context) {
-
-    private val database: AppDatabase by lazy {
-        Room.databaseBuilder(context, AppDatabase::class.java, "chat_db")
-                .fallbackToDestructiveMigration()
-                .build()
-    }
 
     // TODO: set dynamically
     private var name: String? = null
 
     fun chats(): LiveData<List<EpoxyModel<*>>> {
-        return Transformations.map(database.chatDao().getAllLive()) { input: List<ChatMessage> ->
+        return Transformations.map(ChatApplication.database.chatDao().getAllLive()) { input: List<ChatMessage> ->
+            Timber.i("Got new set of models ...")
             input.map {
                 val model = ChatViewModel_()
-                model.id(it.message)
+                model.id(it.timestamp)
                 model.value(it)
             }
         }
@@ -43,7 +37,7 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
         } else {
             ChatMessage(name = n, message = message)
         }
-        database.chatDao().insert(chatMessage)
+        ChatApplication.database.chatDao().insert(chatMessage)
         Backend.instance.post(chatMessage).execute()
     }
 
