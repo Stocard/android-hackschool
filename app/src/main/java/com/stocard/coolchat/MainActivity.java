@@ -7,14 +7,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +35,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private ListView chatListView;
+    private EditText editText;
     private ProgressDialog pd;
 
     @Override
@@ -36,6 +44,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         chatListView = findViewById(R.id.chat_list);
+        editText = findViewById(R.id.message_input);
+        Button buttonSend = findViewById(R.id.send_button);
+
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String input = editText.getText().toString();
+                send(input);
+                editText.setText(null);
+            }
+        });
     }
 
     @Override
@@ -45,20 +64,44 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private AsyncTask<String, String, String> fetchMessages() {
-        return new JsonTask().execute("https://android-hackschool.herokuapp.com");
+    private void send(String message) {
+        new PostMessageTask().execute("https://android-hackschool.herokuapp.com/message", "name", message);
+    }
+
+    private void fetchMessages() {
+        new GetMessagesTask().execute("https://android-hackschool.herokuapp.com");
+    }
+
+    private void showMessages(List<Message> messages) {
+        List<String> messageItems = new ArrayList<>();
+        for (Message message : messages) {
+            messageItems.add(message.getName() + ": " + message.getMessage());
+        }
+        chatListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messageItems));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        fetchMessages();
+        return true;
     }
 
     /**
      * Borrowed form https://stackoverflow.com/a/37525989/570168.
      */
-    private class JsonTask extends AsyncTask<String, String, String> {
+    private class GetMessagesTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
             super.onPreExecute();
 
             pd = new ProgressDialog(MainActivity.this);
-            pd.setMessage("Please wait");
+            pd.setMessage("Fetching messages, please wait");
             pd.setCancelable(false);
             pd.show();
         }
@@ -69,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             BufferedReader reader = null;
 
             try {
-                Thread.sleep(1000); // for some more drama on fast networks ;-)
+                Thread.sleep(100); // for some more drama on fast networks ;-)
                 URL url = new URL(params[0]);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
@@ -130,23 +173,69 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showMessages(List<Message> messages) {
-        List<String> messageItems = new ArrayList<>();
-        for (Message message : messages) {
-            messageItems.add(message.getName() + ": " + message.getMessage());
+    private class PostMessageTask extends AsyncTask<String, String, String> {
+
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            pd = new ProgressDialog(MainActivity.this);
+            pd.setMessage("Sending, please wait");
+            pd.setCancelable(false);
+            pd.show();
         }
-        chatListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messageItems));
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        return super.onCreateOptionsMenu(menu);
-    }
+        protected String doInBackground(String... params) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        fetchMessages();
-        return true;
+            HttpURLConnection connection = null;
+
+            try {
+                Thread.sleep(100); // for some more drama on fast networks ;-)
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.connect();
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("name", params[1]);
+                jsonParam.put("message", params[2]);
+
+                DataOutputStream os = new DataOutputStream(connection.getOutputStream());
+                os.writeBytes(jsonParam.toString());
+
+                os.flush();
+                os.close();
+
+                Log.i("STATUS", String.valueOf(connection.getResponseCode()));
+                Log.i("MSG", connection.getResponseMessage());
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if (pd.isShowing()) {
+                pd.dismiss();
+            }
+
+            fetchMessages();
+        }
     }
 }
