@@ -11,7 +11,10 @@ import android.widget.ArrayAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.DataOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -21,38 +24,64 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // private val chatListView: ListView  by lazy { this.findViewById<ListView>(R.id.chat_list) }
-
     private var pd: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        send_button.setOnClickListener {
+            val input = message_input.text.toString()
+            send(input)
+            message_input.text = null
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        fetchKotlinMessages()
+        fetchMessages()
+
     }
 
-    private fun fetchKotlinMessages(): AsyncTask<String, String, String> {
-        return JsonTask().execute("https://android-hackschool.herokuapp.com")
+    private fun send(message: String) {
+        PostMessageTask().execute("https://android-hackschool.herokuapp.com/message", "name", message)
+    }
+
+    private fun fetchMessages() {
+        GetMessagesTask().execute("https://android-hackschool.herokuapp.com")
+    }
+
+    private fun showMessages(messages: List<Message>) {
+        val messageItems = ArrayList<String>()
+        for (message in messages) {
+            messageItems.add(message.name + ": " + message.message)
+        }
+        chat_list.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, messageItems)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.add("Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        fetchMessages()
+        return true
     }
 
     /**
      * Borrowed form https://stackoverflow.com/a/37525989/570168.
      */
-    private inner class JsonTask : AsyncTask<String, String, String>() {
+    private inner class GetMessagesTask : AsyncTask<String, String, String>() {
 
         override fun onPreExecute() {
             super.onPreExecute()
 
-            pd = ProgressDialog(this@MainActivity)
-                    .apply {
-                        this.setMessage("Please wait")
-                        this.setCancelable(false)
-                        this.show()
-                    }
+            pd = ProgressDialog(this@MainActivity).apply {
+                setMessage("Fetching messages, please wait")
+                setCancelable(false)
+                show()
+            }
         }
 
         override fun doInBackground(vararg params: String): String? {
@@ -61,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             var reader: BufferedReader? = null
 
             try {
-                Thread.sleep(1000) // for some more drama on fast networks ;-)
+                Thread.sleep(100) // for some more drama on fast networks ;-)
                 val url = URL(params[0])
                 connection = url.openConnection() as HttpURLConnection
                 connection.connect()
@@ -73,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 
                 val buffer = StringBuffer()
 
-                for (line in reader.lines()) {
+                for (line in reader.readLines()) {
                     buffer.append(line + "\n")
                     Log.d("Response: ", "> $line")
                 }
@@ -101,7 +130,6 @@ class MainActivity : AppCompatActivity() {
         override fun onPostExecute(result: String) {
             super.onPostExecute(result)
             pd?.dismiss()
-            pd = null
 
             val moshi = Moshi.Builder().build()
             val type = Types.newParameterizedType(List::class.java, Message::class.java)
@@ -112,28 +140,72 @@ class MainActivity : AppCompatActivity() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+
             if (messages != null) {
-                showKotlinMessages(messages)
+                showMessages(messages)
             }
-
         }
     }
 
-    private fun showKotlinMessages(messages: List<Message>) {
-        val messageItems = ArrayList<String>()
-        for (message in messages) {
-            messageItems.add(message.name + ": " + message.message)
+    private inner class PostMessageTask : AsyncTask<String, String, String>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+
+            pd = ProgressDialog(this@MainActivity).apply {
+                setMessage("Sending, please wait")
+                setCancelable(false)
+                show()
+            }
         }
-        chat_list.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, messageItems)
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add("Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-        return super.onCreateOptionsMenu(menu)
-    }
+        override fun doInBackground(vararg params: String): String? {
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        fetchKotlinMessages()
-        return true
+            var connection: HttpURLConnection? = null
+
+            try {
+                Thread.sleep(100) // for some more drama on fast networks ;-)
+                val url = URL(params[0])
+                connection = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    setRequestProperty("Accept", "application/json")
+                    doOutput = true
+                    doInput = true
+                }
+                connection.connect()
+
+                val jsonParam = JSONObject()
+                jsonParam.put("name", params[1])
+                jsonParam.put("message", params[2])
+
+                val os = DataOutputStream(connection.outputStream)
+                os.writeBytes(jsonParam.toString())
+
+                os.flush()
+                os.close()
+
+                Log.i("STATUS", connection.responseCode.toString())
+                Log.i("MSG", connection.responseMessage)
+
+            } catch (e: MalformedURLException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            } finally {
+                connection?.disconnect()
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            pd?.dismiss()
+            fetchMessages()
+        }
     }
 }
