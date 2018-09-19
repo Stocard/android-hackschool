@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,15 +21,25 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var pd: ProgressDialog? = null
+    private var progressDialog: ProgressDialog? = null
+
+    private val adapter: ArrayAdapter<String> by lazy {
+        ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
+    }
+
+    private val messageParser: JsonAdapter<List<Message>> by lazy {
+        val moshi = Moshi.Builder().build()
+        val type = Types.newParameterizedType(List::class.java, Message::class.java)
+        moshi.adapter<List<Message>>(type)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        chat_list.adapter = adapter
 
         send_button.setOnClickListener {
             val input = message_input.text.toString()
@@ -40,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchMessages()
-
     }
 
     private fun send(message: String) {
@@ -52,15 +62,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMessages(messages: List<Message>) {
-        val messageItems = ArrayList<String>()
-        for (message in messages) {
-            messageItems.add(message.name + ": " + message.message)
-        }
-        chat_list.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, messageItems)
+        val messageItems = messages.map { it.name + ": " + it.message }
+        adapter.clear()
+        adapter.addAll(messageItems)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add("Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        menu.add(R.string.refresh).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -77,8 +85,8 @@ class MainActivity : AppCompatActivity() {
         override fun onPreExecute() {
             super.onPreExecute()
 
-            pd = ProgressDialog(this@MainActivity).apply {
-                setMessage("Fetching messages, please wait")
+            progressDialog = ProgressDialog(this@MainActivity).apply {
+                setMessage(getString(R.string.getting_messages_dialog_message))
                 setCancelable(false)
                 show()
             }
@@ -87,7 +95,6 @@ class MainActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String): String? {
 
             var connection: HttpURLConnection? = null
-            var reader: BufferedReader? = null
 
             try {
                 Thread.sleep(100) // for some more drama on fast networks ;-)
@@ -95,19 +102,13 @@ class MainActivity : AppCompatActivity() {
                 connection = url.openConnection() as HttpURLConnection
                 connection.connect()
 
-
                 val stream = connection.inputStream
 
-                reader = BufferedReader(InputStreamReader(stream))
-
-                val buffer = StringBuffer()
-
-                for (line in reader.readLines()) {
-                    buffer.append(line + "\n")
-                    Log.d("Response: ", "> $line")
+                val response = BufferedReader(InputStreamReader(stream)).use {
+                    it.readLines().joinToString("\n")
                 }
-
-                return buffer.toString()
+                Log.d("Response: ", "> $response")
+                return response
 
             } catch (e: MalformedURLException) {
                 e.printStackTrace()
@@ -117,26 +118,17 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             } finally {
                 connection?.disconnect()
-                try {
-                    reader?.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
             }
             return null
         }
 
         override fun onPostExecute(result: String) {
             super.onPostExecute(result)
-            pd?.dismiss()
+            progressDialog?.dismiss()
 
-            val moshi = Moshi.Builder().build()
-            val type = Types.newParameterizedType(List::class.java, Message::class.java)
-            val jsonAdapter = moshi.adapter<List<Message>>(type)
             var messages: List<Message>? = null
             try {
-                messages = jsonAdapter.fromJson(result)
+                messages = messageParser.fromJson(result)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -152,8 +144,8 @@ class MainActivity : AppCompatActivity() {
         override fun onPreExecute() {
             super.onPreExecute()
 
-            pd = ProgressDialog(this@MainActivity).apply {
-                setMessage("Sending, please wait")
+            progressDialog = ProgressDialog(this@MainActivity).apply {
+                setMessage(getString(R.string.posting_messages_dialog_message))
                 setCancelable(false)
                 show()
             }
@@ -175,15 +167,16 @@ class MainActivity : AppCompatActivity() {
                 }
                 connection.connect()
 
-                val jsonParam = JSONObject()
-                jsonParam.put("name", params[1])
-                jsonParam.put("message", params[2])
+                val jsonParam = JSONObject().apply {
+                    put("name", params[1])
+                    put("message", params[2])
+                }
 
-                val os = DataOutputStream(connection.outputStream)
-                os.writeBytes(jsonParam.toString())
-
-                os.flush()
-                os.close()
+                DataOutputStream(connection.outputStream).use { outputStream ->
+                    outputStream.writeBytes(jsonParam.toString())
+                    outputStream.flush()
+                    outputStream.close()
+                }
 
                 Log.i("STATUS", connection.responseCode.toString())
                 Log.i("MSG", connection.responseMessage)
@@ -204,7 +197,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            pd?.dismiss()
+            progressDialog?.dismiss()
             fetchMessages()
         }
     }

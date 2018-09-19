@@ -2,4 +2,7 @@
     <string name="app_name">Cool Chat</string>
     <string name="message">Message</string>
     <string name="send">Send</string>
+    <string name="refresh">Refresh</string>
+    <string name="getting_messages_dialog_message">Fetching messages, please wait</string>
+    <string name="posting_messages_dialog_message">Sending, please wait</string>
 </resources>
