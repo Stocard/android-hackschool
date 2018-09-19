@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView chatListView;
     private EditText editText;
-    private ProgressDialog pd;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,10 +100,10 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            pd = new ProgressDialog(MainActivity.this);
-            pd.setMessage("Fetching messages, please wait");
-            pd.setCancelable(false);
-            pd.show();
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setMessage("Fetching messages, please wait");
+            dialog.setCancelable(false);
+            dialog.show();
         }
 
         protected String doInBackground(String... params) {
@@ -156,8 +156,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if (pd.isShowing()) {
-                pd.dismiss();
+            if (dialog.isShowing()) {
+                dialog.dismiss();
             }
 
             Moshi moshi = new Moshi.Builder().build();
@@ -178,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            pd = new ProgressDialog(MainActivity.this);
-            pd.setMessage("Sending, please wait");
-            pd.setCancelable(false);
-            pd.show();
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setMessage("Sending, please wait");
+            dialog.setCancelable(false);
+            dialog.show();
         }
 
         protected String doInBackground(String... params) {
@@ -231,8 +231,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if (pd.isShowing()) {
-                pd.dismiss();
+            if (dialog.isShowing()) {
+                dialog.dismiss();
             }
 
             fetchMessages();
