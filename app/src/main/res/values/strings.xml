@@ -3,6 +3,6 @@
     <string name="message">Message</string>
     <string name="send">Send</string>
     <string name="refresh">Refresh</string>
-    <string name="getting_messages_dialog_message">Fetching messages, please wait</string>
-    <string name="posting_messages_dialog_message">Sending, please wait</string>
+    <string name="posting_message_failed_message">Sending message failed</string>
+    <string name="fetching_messages_failed_message">Retrieving messages failed</string>
 </resources>

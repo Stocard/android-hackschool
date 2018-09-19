@@ -1,39 +1,24 @@
 package com.stocard.coolchat
 
-import android.app.ProgressDialog
-import android.os.AsyncTask
+import android.app.AlertDialog
 import android.os.Bundle
+import android.support.annotation.StringRes
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
+import com.stocard.coolchat.backend.Backend
+import com.stocard.coolchat.backend.BackendService
+import com.stocard.coolchat.backend.enqueue
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.DataOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URL
 
 class MainActivity : AppCompatActivity() {
 
-    private var progressDialog: ProgressDialog? = null
-
+    private val backend: BackendService by lazy { Backend.instance }
     private val adapter: ArrayAdapter<String> by lazy {
         ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
-    }
-
-    private val messageParser: JsonAdapter<List<Message>> by lazy {
-        val moshi = Moshi.Builder().build()
-        val type = Types.newParameterizedType(List::class.java, Message::class.java)
-        moshi.adapter<List<Message>>(type)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,11 +39,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun send(message: String) {
-        PostMessageTask().execute("https://android-hackschool.herokuapp.com/message", "name", message)
+        progress_bar.visibility = View.VISIBLE
+        backend.postMessage(Message(message, "name")).enqueue(
+                { error ->
+                    Log.e(LOG_TAG, Log.getStackTraceString(error))
+                    progress_bar.visibility = View.GONE
+                    displayError(R.string.posting_message_failed_message)
+                },
+                { _ ->
+                    progress_bar.visibility = View.GONE
+                    fetchMessages()
+                }
+        )
     }
 
     private fun fetchMessages() {
-        GetMessagesTask().execute("https://android-hackschool.herokuapp.com")
+        progress_bar.visibility = View.VISIBLE
+        backend.fetchMessages().enqueue(
+                { error ->
+                    Log.e(LOG_TAG, Log.getStackTraceString(error))
+                    progress_bar.visibility = View.GONE
+                    displayError(R.string.fetching_messages_failed_message)
+                },
+                { result ->
+                    progress_bar.visibility = View.GONE
+                    result.body()?.let { showMessages(it) }
+                }
+        )
+    }
+
+    private fun displayError(@StringRes message: Int) {
+        AlertDialog.Builder(this).apply {
+            setMessage(message)
+        }.show()
     }
 
     private fun showMessages(messages: List<Message>) {
@@ -77,128 +90,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    /**
-     * Borrowed form https://stackoverflow.com/a/37525989/570168.
-     */
-    private inner class GetMessagesTask : AsyncTask<String, String, String>() {
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-
-            progressDialog = ProgressDialog(this@MainActivity).apply {
-                setMessage(getString(R.string.getting_messages_dialog_message))
-                setCancelable(false)
-                show()
-            }
-        }
-
-        override fun doInBackground(vararg params: String): String? {
-
-            var connection: HttpURLConnection? = null
-
-            try {
-                Thread.sleep(100) // for some more drama on fast networks ;-)
-                val url = URL(params[0])
-                connection = url.openConnection() as HttpURLConnection
-                connection.connect()
-
-                val stream = connection.inputStream
-
-                val response = BufferedReader(InputStreamReader(stream)).use {
-                    it.readLines().joinToString("\n")
-                }
-                Log.d("Response: ", "> $response")
-                return response
-
-            } catch (e: MalformedURLException) {
-                e.printStackTrace()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            } finally {
-                connection?.disconnect()
-            }
-            return null
-        }
-
-        override fun onPostExecute(result: String) {
-            super.onPostExecute(result)
-            progressDialog?.dismiss()
-
-            var messages: List<Message>? = null
-            try {
-                messages = messageParser.fromJson(result)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-            if (messages != null) {
-                showMessages(messages)
-            }
-        }
+    companion object {
+        private const val LOG_TAG = "MainActivity"
     }
 
-    private inner class PostMessageTask : AsyncTask<String, String, String>() {
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-
-            progressDialog = ProgressDialog(this@MainActivity).apply {
-                setMessage(getString(R.string.posting_messages_dialog_message))
-                setCancelable(false)
-                show()
-            }
-        }
-
-        override fun doInBackground(vararg params: String): String? {
-
-            var connection: HttpURLConnection? = null
-
-            try {
-                Thread.sleep(100) // for some more drama on fast networks ;-)
-                val url = URL(params[0])
-                connection = (url.openConnection() as HttpURLConnection).apply {
-                    requestMethod = "POST"
-                    setRequestProperty("Content-Type", "application/json")
-                    setRequestProperty("Accept", "application/json")
-                    doOutput = true
-                    doInput = true
-                }
-                connection.connect()
-
-                val jsonParam = JSONObject().apply {
-                    put("name", params[1])
-                    put("message", params[2])
-                }
-
-                DataOutputStream(connection.outputStream).use { outputStream ->
-                    outputStream.writeBytes(jsonParam.toString())
-                    outputStream.flush()
-                    outputStream.close()
-                }
-
-                Log.i("STATUS", connection.responseCode.toString())
-                Log.i("MSG", connection.responseMessage)
-
-            } catch (e: MalformedURLException) {
-                e.printStackTrace()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            } finally {
-                connection?.disconnect()
-            }
-            return null
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            progressDialog?.dismiss()
-            fetchMessages()
-        }
-    }
 }
