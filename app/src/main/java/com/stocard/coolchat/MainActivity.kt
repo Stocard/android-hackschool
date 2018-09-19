@@ -38,9 +38,14 @@ class MainActivity : AppCompatActivity() {
         fetchMessages()
     }
 
-    private fun send(message: String) {
+    private fun send(text: String) {
         progress_bar.visibility = View.VISIBLE
-        backend.postMessage(Message(message, "name")).enqueue(
+        val message = Message(
+                message = text,
+                name = "name",
+                timestamp = System.currentTimeMillis()
+        )
+        backend.postMessage(message).enqueue(
                 { error ->
                     Log.e(LOG_TAG, Log.getStackTraceString(error))
                     progress_bar.visibility = View.GONE
