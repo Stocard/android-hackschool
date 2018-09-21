@@ -1,6 +1,7 @@
 package com.stocard.coolchat.backend
 
 import android.util.Log
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -22,6 +23,7 @@ object Backend {
                 .client(okHttpClient)
                 .baseUrl("https://android-hackschool.herokuapp.com")
                 .addConverterFactory(MoshiConverterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .build()
     }
 

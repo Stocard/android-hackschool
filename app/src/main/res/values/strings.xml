@@ -2,7 +2,6 @@
     <string name="app_name">Cool Chat</string>
     <string name="message">Message</string>
     <string name="send">Send</string>
-    <string name="refresh">Refresh</string>
     <string name="posting_message_failed_message">Sending message failed</string>
     <string name="fetching_messages_failed_message">Retrieving messages failed</string>
 </resources>

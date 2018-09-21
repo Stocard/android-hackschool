@@ -1,4 +1,4 @@
-package com.stocard.coolchat
+package com.stocard.coolchat.data
 
 data class Message(
         val message: String,

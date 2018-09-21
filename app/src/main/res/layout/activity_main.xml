@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ui.chat.MainActivity">
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -13,6 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminateOnly="true" />
+
+    <TextView
+        android:id="@+id/error_output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/error"
+        android:text="@string/fetching_messages_failed_message"
+        android:visibility="gone" />
 
     <ListView
         android:id="@+id/chat_list"
