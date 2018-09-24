@@ -1,27 +1,38 @@
 package com.stocard.coolchat.ui.chat
 
-import android.content.Context
-import android.util.AttributeSet
-import android.widget.TextView
-import com.airbnb.epoxy.ModelProp
-import com.airbnb.epoxy.ModelView
-import com.stocard.coolchat.data.Message
+import android.support.v7.widget.AppCompatTextView
+import android.view.View
+import com.airbnb.epoxy.EpoxyAttribute
+import com.airbnb.epoxy.EpoxyHolder
+import com.airbnb.epoxy.EpoxyModelClass
+import com.airbnb.epoxy.EpoxyModelWithHolder
+import com.stocard.coolchat.R
 
-@ModelView(autoLayout = ModelView.Size.MATCH_WIDTH_WRAP_HEIGHT)
-class MessageView @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
-) : TextView(context, attrs, defStyleAttr) {
+@EpoxyModelClass(layout = R.layout.model_chat_message)
+abstract class ChatMessageView : EpoxyModelWithHolder<Holder>() {
 
+    @EpoxyAttribute
+    lateinit var name: String
 
-    @ModelProp
-    fun setValue(chatMessage: Message) {
-        this.text = "${chatMessage.name}: ${chatMessage.message}"
-        id = chatMessage.hashCode()
+    @EpoxyAttribute
+    lateinit var message: String
 
-        val color: Int = chatMessage.name.hashCode().or(0xFF000000.toInt())
-        this.setTextColor(color)
+    override fun bind(holder: Holder) {
+        holder.nameView.text = name
+        holder.messageView.text = message
+    }
+
+}
+
+class Holder : EpoxyHolder() {
+
+    private lateinit var layout: View
+
+    val nameView: AppCompatTextView by lazy { layout.findViewById<AppCompatTextView>(R.id.name) }
+    val messageView: AppCompatTextView by lazy { layout.findViewById<AppCompatTextView>(R.id.message) }
+
+    override fun bindView(itemView: View) {
+        this.layout = itemView
     }
 
 }

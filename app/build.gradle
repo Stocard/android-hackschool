@@ -53,8 +53,8 @@ dependencies {
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
 
     // Recyclerview
-    implementation 'com.airbnb.android:epoxy:2+'
-    kapt 'com.airbnb.android:epoxy-processor:2+'
+    implementation 'com.airbnb.android:epoxy:2.17.0'
+    kapt 'com.airbnb.android:epoxy-processor:2.17.0'
 
     // coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.0"
