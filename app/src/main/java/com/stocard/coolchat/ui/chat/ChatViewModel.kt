@@ -4,6 +4,8 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.Transformations
+import com.airbnb.epoxy.EpoxyModel
 import com.stocard.coolchat.data.ChatRepository
 import com.stocard.coolchat.data.NetworkState
 
@@ -19,7 +21,7 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
             )
 
             val combined = MediatorLiveData<ChatViewState>()
-            combined.addSource(chatRepository.chatMessages()) { messages ->
+            combined.addSource(getMessages()) { messages ->
                 val currentState = combined.value ?: initialState
                 if (messages != null) combined.value = currentState.copy(messages = messages)
             }
@@ -31,6 +33,16 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
 
             return combined
         }
+
+    private fun getMessages(): LiveData<List<EpoxyModel<*>>> {
+        return Transformations.map(chatRepository.chatMessages()) { chatMessages ->
+            chatMessages.map {
+                val model = MessageViewModel_()
+                model.value(it)
+                model.id(it.timestamp)
+            }
+        }
+    }
 
     fun send(text: String): LiveData<Boolean> {
         return chatRepository.sendMessage(text)

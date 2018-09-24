@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 28
@@ -39,7 +40,6 @@ dependencies {
     implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-experimental-adapter:1.0.0'
     //implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.1'
 
-
     // parsing json
     implementation 'com.squareup.moshi:moshi:1.6.0'
 
@@ -51,6 +51,10 @@ dependencies {
     implementation "android.arch.lifecycle:runtime:$lifecycle_version"
     kapt "android.arch.lifecycle:compiler:$lifecycle_version"
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
+
+    // Recyclerview
+    implementation 'com.airbnb.android:epoxy:2+'
+    kapt 'com.airbnb.android:epoxy-processor:2+'
 
     // coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.0"

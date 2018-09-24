@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import com.stocard.coolchat.data.ChatRepository
+import com.airbnb.epoxy.SimpleEpoxyAdapter
 import com.stocard.coolchat.R
 import com.stocard.coolchat.data.NetworkState
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,13 +17,13 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private val viewModel by lazy { ViewModelProviders.of(this).get(ChatViewModel::class.java) }
-    private val adapter: ArrayAdapter<String> by lazy {
-        ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
-    }
+    private val adapter: SimpleEpoxyAdapter by lazy { SimpleEpoxyAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        chat_list.layoutManager = LinearLayoutManager(this)
         chat_list.adapter = adapter
 
         send_button.setOnClickListener {
@@ -41,8 +41,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUi(state: ChatViewState) {
         Log.d(LOG_TAG, "viewState changed to $state")
-        adapter.clear()
-        adapter.addAll(state.messages.map { "${it.name}: ${it.message}" })
+
+        adapter.removeAllModels()
+        adapter.addModels(state.messages)
 
         when (state.networkState) {
             NetworkState.DONE -> {
