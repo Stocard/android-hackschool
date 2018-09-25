@@ -4,12 +4,12 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
-import com.stocard.coolchat.data.ChatRepository
+import com.stocard.coolchat.ServiceLocator
 import com.stocard.coolchat.data.NetworkState
 
 class ChatViewModel(context: Application) : AndroidViewModel(context) {
 
-    private val chatRepository = ChatRepository()
+    private val chatRepository = ServiceLocator.get(context).chatRepository
 
     val viewState: LiveData<ChatViewState>
         get() {

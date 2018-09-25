@@ -2,17 +2,24 @@ package com.stocard.coolchat.data
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.content.Context
+import android.preference.PreferenceManager
 import android.util.Log
 import com.stocard.coolchat.backend.Backend
 import com.stocard.coolchat.backend.BackendService
 import kotlinx.coroutines.experimental.*
 import java.util.concurrent.TimeUnit
 
-class ChatRepository {
+class ChatRepository(context: Context) {
 
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val backend: BackendService by lazy { Backend.instance }
-
+    private val nameState = MutableLiveData<String>()
     private val networkingState = MutableLiveData<NetworkState>()
+
+    init {
+        nameState.postValue(prefs.getString("name", null))
+    }
 
     private val messages = object : LiveData<List<Message>>() {
 
@@ -44,10 +51,15 @@ class ChatRepository {
         }
     }
 
+    fun setName(name: String) {
+        prefs.edit().putString("name", name).apply()
+        nameState.postValue(name)
+    }
+
     fun sendMessage(text: String): LiveData<Boolean> {
         val message = Message(
                 message = text,
-                name = "name",
+                name = nameState.value ?: "no-name",
                 timestamp = System.currentTimeMillis()
         )
         val result = MutableLiveData<Boolean>()
