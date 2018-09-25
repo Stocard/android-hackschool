@@ -1,8 +1,10 @@
 package com.stocard.coolchat
 
 import android.app.ProgressDialog
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -22,18 +24,20 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 
+
 class MainActivity : AppCompatActivity() {
 
     private var progressDialog: ProgressDialog? = null
+    private val prefs by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+    private var name: String? = null
 
     private val adapter: ArrayAdapter<String> by lazy {
         ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
     }
 
     private val messageParser: JsonAdapter<List<Message>> by lazy {
-        val moshi = Moshi.Builder().build()
         val type = Types.newParameterizedType(List::class.java, Message::class.java)
-        moshi.adapter<List<Message>>(type)
+        Moshi.Builder().build().adapter<List<Message>>(type)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +55,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchMessages()
+
+        name = prefs.getString("name", null)
+        if (name == null) {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun send(message: String) {

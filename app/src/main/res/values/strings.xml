@@ -5,4 +5,7 @@
     <string name="refresh">Refresh</string>
     <string name="getting_messages_dialog_message">Fetching messages, please wait</string>
     <string name="posting_messages_dialog_message">Sending, please wait</string>
+    <string name="save_name">Save Name</string>
+    <string name="name">Name</string>
+    <string name="profile_activity_title">Choose a name</string>
 </resources>
