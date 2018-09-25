@@ -18,14 +18,14 @@ class ChatViewModel(context: Application) : AndroidViewModel(context) {
     val viewState: LiveData<ChatViewState>
         get() {
             val initialState = ChatViewState(
-                    messages = emptyList(),
+                    models = emptyList(),
                     networkState = NetworkState.DONE
             )
 
             val combined = MediatorLiveData<ChatViewState>()
-            combined.addSource(getMessages()) { messages ->
+            combined.addSource(getMessages()) { models ->
                 val currentState = combined.value ?: initialState
-                if (messages != null) combined.value = currentState.copy(messages = messages)
+                if (models != null) combined.value = currentState.copy(models = models)
             }
 
             combined.addSource(chatRepository.networkState()) { state ->

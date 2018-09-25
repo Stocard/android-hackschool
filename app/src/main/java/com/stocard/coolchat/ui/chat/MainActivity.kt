@@ -43,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         Log.d(LOG_TAG, "viewState changed to $state")
 
         adapter.removeAllModels()
-        adapter.addModels(state.messages)
+        adapter.addModels(state.models)
+        chat_list.scrollToPosition(adapter.itemCount - 1)
 
         when (state.networkState) {
             NetworkState.DONE -> {
