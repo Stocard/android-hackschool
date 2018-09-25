@@ -15,6 +15,8 @@
             android:indeterminateOnly="true"/>
 
     <TextView
+            android:padding="4dp"
+            android:textColor="#fff"
             android:id="@+id/error_output"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
