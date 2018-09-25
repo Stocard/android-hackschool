@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun send(message: String) {
-        PostMessageTask().execute("https://android-hackschool.herokuapp.com/message", "name", message)
+        PostMessageTask().execute("https://android-hackschool.herokuapp.com/message", name, message)
     }
 
     private fun fetchMessages() {
