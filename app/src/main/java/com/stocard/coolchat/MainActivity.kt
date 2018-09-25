@@ -1,7 +1,9 @@
 package com.stocard.coolchat
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.annotation.StringRes
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -14,9 +16,13 @@ import com.stocard.coolchat.backend.BackendService
 import com.stocard.coolchat.backend.enqueue
 import kotlinx.android.synthetic.main.activity_main.*
 
+
 class MainActivity : AppCompatActivity() {
 
     private val backend: BackendService by lazy { Backend.instance }
+    private val prefs by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+    private var name: String? = null
+
     private val adapter: ArrayAdapter<String> by lazy {
         ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
     }
@@ -36,13 +42,19 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchMessages()
+
+        name = prefs.getString("name", null)
+        if (name == null) {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun send(text: String) {
         progress_bar.visibility = View.VISIBLE
         val message = Message(
                 message = text,
-                name = "name",
+                name = name ?: "no-name",
                 timestamp = System.currentTimeMillis()
         )
         backend.postMessage(message).enqueue(
