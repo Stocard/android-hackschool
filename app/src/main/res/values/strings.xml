@@ -4,4 +4,7 @@
     <string name="send">Send</string>
     <string name="posting_message_failed_message">Sending message failed</string>
     <string name="fetching_messages_failed_message">Retrieving messages failed</string>
+    <string name="save_name">Save Name</string>
+    <string name="name">Name</string>
+    <string name="profile_activity_title">Choose a name</string>
 </resources>

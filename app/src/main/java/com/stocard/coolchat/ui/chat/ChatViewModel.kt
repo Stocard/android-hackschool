@@ -6,14 +6,14 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.Transformations
 import com.airbnb.epoxy.EpoxyModel
-import com.stocard.coolchat.data.ChatRepository
+import com.stocard.coolchat.ServiceLocator
 import com.stocard.coolchat.data.NetworkState
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ChatViewModel(context: Application) : AndroidViewModel(context) {
 
-    private val chatRepository = ChatRepository()
+    private val chatRepository = ServiceLocator.get(context).chatRepository
 
     val viewState: LiveData<ChatViewState>
         get() {
