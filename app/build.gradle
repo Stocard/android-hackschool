@@ -12,6 +12,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas".toString())
+            }
+        }
     }
     buildTypes {
         release {
@@ -44,6 +50,7 @@ dependencies {
     implementation 'com.squareup.moshi:moshi:1.6.0'
 
     def lifecycle_version = "1.1.1"
+    def room_version = "1.1.1"
 
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
@@ -51,6 +58,10 @@ dependencies {
     implementation "android.arch.lifecycle:runtime:$lifecycle_version"
     kapt "android.arch.lifecycle:compiler:$lifecycle_version"
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
+
+    // Room database
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
 
     // Recyclerview
     implementation 'com.airbnb.android:epoxy:2.17.0'
