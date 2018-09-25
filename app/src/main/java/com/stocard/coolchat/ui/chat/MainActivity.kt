@@ -4,15 +4,12 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.annotation.StringRes
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.Menu
 import android.view.View
-import com.airbnb.epoxy.SimpleEpoxyAdapter
 import com.stocard.coolchat.ProfileActivity
 import com.stocard.coolchat.R
 import com.stocard.coolchat.data.NetworkState
@@ -20,16 +17,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val prefs by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
     private val viewModel by lazy { ViewModelProviders.of(this).get(ChatViewModel::class.java) }
-    private val adapter: SimpleEpoxyAdapter by lazy { SimpleEpoxyAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        chat_recycler_view.layoutManager = LinearLayoutManager(this)
-        chat_recycler_view.adapter = adapter
 
         send_button.setOnClickListener {
             val input = message_input.text.toString()
@@ -53,9 +45,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateUi(state: ChatViewState) {
         Log.d(LOG_TAG, "viewState changed to $state")
 
-        adapter.removeAllModels()
-        adapter.addModels(state.models)
-        chat_recycler_view.scrollToPosition(adapter.itemCount - 1)
+        chat_recycler_view.setModels(state.models)
+        chat_recycler_view.scrollToPosition(chat_recycler_view.adapter.itemCount - 1)
 
         when (state.networkState) {
             NetworkState.DONE -> {
