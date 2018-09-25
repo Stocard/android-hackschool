@@ -75,6 +75,9 @@ class ChatRepository(context: Context) {
         return result
     }
 
+    fun nameState(): LiveData<String> {
+        return nameState
+    }
 
     fun chatMessages(): LiveData<List<Message>> {
         return messages

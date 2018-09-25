@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setSupportActionBar(toolbar)
+
         chat_list.layoutManager = LinearLayoutManager(this)
         chat_list.adapter = adapter
 
