@@ -13,9 +13,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.View
 import com.airbnb.epoxy.SimpleEpoxyAdapter
-import com.stocard.coolchat.ProfileActivity
 import com.stocard.coolchat.R
 import com.stocard.coolchat.data.NetworkState
+import com.stocard.coolchat.ui.profile.ProfileActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {

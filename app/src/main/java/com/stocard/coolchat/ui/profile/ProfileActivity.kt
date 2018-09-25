@@ -1,11 +1,11 @@
-package com.stocard.coolchat
+package com.stocard.coolchat.ui.profile
 
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.stocard.coolchat.R
 import com.stocard.coolchat.databinding.ActivityProfileBinding
-import com.stocard.coolchat.ui.profile.ProfileViewModel
 import kotlinx.android.synthetic.main.activity_profile.*
 
 class ProfileActivity : AppCompatActivity() {
