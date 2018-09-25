@@ -28,8 +28,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        chat_list.layoutManager = LinearLayoutManager(this)
-        chat_list.adapter = adapter
+        chat_recycler_view.layoutManager = LinearLayoutManager(this)
+        chat_recycler_view.adapter = adapter
 
         send_button.setOnClickListener {
             val input = message_input.text.toString()
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         adapter.removeAllModels()
         adapter.addModels(state.models)
-        chat_list.scrollToPosition(adapter.itemCount - 1)
+        chat_recycler_view.scrollToPosition(adapter.itemCount - 1)
 
         when (state.networkState) {
             NetworkState.DONE -> {

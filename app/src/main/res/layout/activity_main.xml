@@ -24,7 +24,7 @@
             android:visibility="gone"/>
 
     <android.support.v7.widget.RecyclerView
-            android:id="@+id/chat_list"
+            android:id="@+id/chat_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>

@@ -26,13 +26,12 @@ abstract class ChatMessageView : EpoxyModelWithHolder<Holder>() {
 
 class Holder : EpoxyHolder() {
 
-    private lateinit var layout: View
-
-    val nameView: AppCompatTextView by lazy { layout.findViewById<AppCompatTextView>(R.id.name) }
-    val messageView: AppCompatTextView by lazy { layout.findViewById<AppCompatTextView>(R.id.message) }
+    lateinit var nameView: AppCompatTextView
+    lateinit var messageView: AppCompatTextView
 
     override fun bindView(itemView: View) {
-        this.layout = itemView
+        nameView = itemView.findViewById(R.id.name)
+        messageView = itemView.findViewById(R.id.message)
     }
 
 }
